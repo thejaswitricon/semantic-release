@@ -37,7 +37,12 @@ jobs:
         id: add_version_to_changelog
         run: |
           version=$(git describe --tags --abbrev=0)
-          sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
+          if [[ $version == v* ]]; then
+            version=$(echo $version | cut -c 2-)
+          fi
+          app_name=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
+          sed -i "s/\[${version}\]/[${app_name}-${version}]/" CHANGELOG.md
+          sed -i "s/\[${app_name}-[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${app_name}-${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md
         continue-on-error: true 
 
       # https://github.com/marketplace/actions/semantic-release-action#usage
