@@ -45,7 +45,7 @@ jobs:
         uses: docker://ghcr.io/codfish/semantic-release-action:v2
         id: semantic
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
         with:
           tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
           additional_packages: |
