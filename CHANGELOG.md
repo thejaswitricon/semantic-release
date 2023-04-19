@@ -1,6 +1,13 @@
 # CHANGELOG
 
-## [1.0.5](https://github.com/thejaswitricon/semantic-release/compare/app1-v1.0.4...app1-v1.0.5) (2023-04-19)
+## [1.0.6](https://github.com/thejaswitricon/semantic-release/compare/app1-v1.0.5...app1-v1.0.6) (2023-04-19)
+
+
+### Bug Fixes
+
+* app1 ([5a67480](https://github.com/thejaswitricon/semantic-release/commit/5a674806a5d4bff21e6ff32758a431894be5555f))
+
+## [app1-v1.0.5] 2023-04-19(https://github.com/thejaswitricon/semantic-release/compare/app1-v1.0.4...app1-v1.0.5) (2023-04-19)
 
 
 ### Bug Fixes
