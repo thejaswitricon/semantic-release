@@ -37,12 +37,11 @@ jobs:
         id: add_version_to_changelog
         run: |
           version=$(git describe --tags --abbrev=0)
-          if [[ $version == v* ]]; then
-            version=$(echo $version | cut -c 2-)
-          fi
           app_name=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
-          sed -i "s/\[${version}\]/[${app_name}-${version}]/" CHANGELOG.md
-          sed -i "s/\[${app_name}-[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${app_name}-${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md
+          echo "## [${app_name}-${version}](https://github.com/thejaswitricon/semantic-release/compare/${app_name}-v$(echo ${{ steps.semantic.outputs.previous-version }})..${app_name}-v$(echo ${{ steps.semantic.outputs.release-version }})) ($(date +'%Y-%m-%d'))" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "${{ steps.semantic.outputs.notes }}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
         continue-on-error: true 
 
       # https://github.com/marketplace/actions/semantic-release-action#usage
