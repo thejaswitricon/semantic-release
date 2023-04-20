@@ -31,7 +31,10 @@ jobs:
         run: |
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
           VERSION=$(echo "${{ steps.semantic.outputs.release-version }}" | awk '{print tolower($0)}')
-          echo "::set-output name=tag_format::${APP_NAME}-v${VERSION}"
+          echo "::set-output name=tag_format::${{ env.APP_NAME }}-v${{ env.VERSION }}-release"
+        env:
+          APP_NAME: ${{ steps.changed_dirs.outputs.dirs }}
+          VERSION: ${{ steps.semantic.outputs.release-version }}
 
 
       - name: Update changelog
@@ -52,7 +55,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
         with:
-          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
+          tag_format: ${{ steps.update_tag_format.outputs.tag_format }}
           additional_packages: |
             ['@semantic-release/changelog', '@semantic-release/git']
           plugins: |
