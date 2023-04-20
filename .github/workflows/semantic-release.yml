@@ -52,20 +52,14 @@ jobs:
           additional_packages: |
             ['@semantic-release/changelog', '@semantic-release/git']
           plugins: |
-            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
+            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '[@semantic-release/github, {tag_name: 'app1-v1.0.0'}]', '@semantic-release/git']
           # specify default branches to add support for the `main` branch
           # which semantic-release doesn't have as a default yet.
           branches: |
             [
               'master'
             ]
-      - name: Update Release Name
-        uses: semantic-release/github@v5
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          action: update
-          tag_name: v${{ env.VERSION }}
-          name: New Release Name
+
       # # Get the latest version tag
       # - name: Get latest version tag
       #   run: |
