@@ -31,7 +31,12 @@ jobs:
         id: update_tag_format
         run: |
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
-          echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
+          version=$(git describe --tags --abbrev=0)
+          if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+            echo "::set-output name=tag_format::${APP_NAME}-${version}"
+          else
+            echo "::set-output name=tag_format::${APP_NAME}-v${version}"
+          fi
 
       - name: Add new version to changelog
         id: add_version_to_changelog
@@ -48,6 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
         with:
           tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
+          latest_tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
           additional_packages: |
             ['@semantic-release/changelog', '@semantic-release/git']
           plugins: |
