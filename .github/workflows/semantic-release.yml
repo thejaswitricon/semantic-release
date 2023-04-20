@@ -32,7 +32,7 @@ jobs:
         id: update_tag_format
         run: |
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
-          echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
+          echo "::set-output name=tag_format::v${APP_NAME}-\${version}"
 
       - name: Add new version to changelog
         id: add_version_to_changelog
