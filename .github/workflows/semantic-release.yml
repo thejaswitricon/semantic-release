@@ -26,18 +26,23 @@ jobs:
         run: |
           echo "::set-output name=dirs::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u)"
 
-      # Update the tag format to include the name of the directory
       - name: Update tag format
         id: update_tag_format
         run: |
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
-          echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
+          VERSION=$(echo "${{ steps.semantic.outputs.release-version }}" | awk '{print tolower($0)}')
+          echo "::set-output name=tag_format::${APP_NAME}-v${VERSION}"
 
-      - name: Add new version to changelog
-        id: add_version_to_changelog
+
+      - name: Update changelog
         run: |
-          version=$(git describe --tags --abbrev=0)
-          sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
+          APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
+          VERSION=$(echo "${{ steps.semantic.outputs.release-version }}" | awk '{print tolower($0)}')
+          DATE=$(date +'%Y-%m-%d')
+          echo "## [${APP_NAME}-v${VERSION}] - ${DATE}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          # add your commit messages between the version headers in the CHANGELOG.md file
+          echo "" >> CHANGELOG.md    
         continue-on-error: true 
 
       # https://github.com/marketplace/actions/semantic-release-action#usage
@@ -47,7 +52,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
         with:
-          tag_format: '${{ steps.changed_dirs.outputs.dirs }}-v${version}'
+          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
           additional_packages: |
             ['@semantic-release/changelog', '@semantic-release/git']
           plugins: |
@@ -69,8 +74,10 @@ jobs:
         id: semantic_summary
         run: |
           echo "### Semantic Version = ${{ steps.semantic.outputs.release-version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB
-
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
 
 
 # name: Semantic Release for Apps
