@@ -50,6 +50,7 @@ jobs:
           done
           echo "::set-output name=tags::${tags[*]}"
 
+
 ####################################################################
       - name: Print output variables
         run: |
