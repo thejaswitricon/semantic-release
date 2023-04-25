@@ -26,8 +26,16 @@ jobs:
       # Get the name of the directory that was changed
       - name: Get changed directory
         id: changed_dir
-        run: 
-          echo "::set-output name=dir::${{ matrix.app }}"
+        run: |
+          modified_files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -E '^applications/(app1|app2)/')
+          if echo "$modified_files" | grep -qE '^applications/app1/'; then
+            echo "::set-output name=dir::app1"
+          elif echo "$modified_files" | grep -qE '^applications/app2/'; then
+            echo "::set-output name=dir::app2"
+          else
+            echo "No changes in app1 or app2 folder."
+            exit 1
+          fi
         
       - name: Print changed directory
         run: |
