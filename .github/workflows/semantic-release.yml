@@ -43,12 +43,13 @@ jobs:
           for dir in "${dirs[@]}"
           do
             APP_NAME=$(echo "$dir" | awk '{print tolower($0)}')
-            tag="${APP_NAME}-v\${{ steps.get_version.outputs.${APP_NAME}_version }}"
+            tag="${APP_NAME}-v${{ steps.get_version.outputs[${APP_NAME}_version] }}"
             tags+=("$tag")
             echo "::set-output name=${APP_NAME}_tag_format::$tag"
             echo "Tag format for $dir is $tag"
           done
           echo "::set-output name=tags::${tags[*]}"
+
 ####################################################################
       - name: Print output variables
         run: |
