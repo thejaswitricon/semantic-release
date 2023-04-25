@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
+          
       # Get the name of the directory that was changed
       - name: Get changed directory
         id: changed_dir
@@ -36,13 +36,15 @@ jobs:
             exit 1
           fi
 
-      # Only run the job for the changed directory
-      - name: Check app name
+      # Check if the changed directory matches the matrix app name
+      - name: Check if changed directory matches matrix app name
+        if: 
+          ${{ matrix.app != steps.changed_dir.outputs.dir }}
         run: |
-          if [[ "${{ matrix.app }}" != "${{ steps.changed_dir.outputs.dir }}" ]]; then
-            echo "Skipping job for ${{ matrix.app }} as it has no changes."
-            exit 0
-          fi
+          echo "Directory ${{ steps.changed_dir.outputs.dir }} not changed, stopping job"
+          exit 78 # exit with neutral status to stop the job
+
+
       - name: Print changed directory
         run: |
           echo "Changed directory: ${{ steps.changed_dir.outputs.dir }}"
