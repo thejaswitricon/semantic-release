@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [1.0.19](https://github.com/thejaswitricon/semantic-release/compare/app1-v1.0.18...app1-v1.0.19) (2023-04-25)
+
+
+### Bug Fixes
+
+* app1 and app2 ([08b57c3](https://github.com/thejaswitricon/semantic-release/commit/08b57c3501146d8623b9dddecdf41e9806227ee0))
+* app1 and app2 ([73f28d2](https://github.com/thejaswitricon/semantic-release/commit/73f28d24e418438b458758c007086198cf7110eb))
+* app1 and app2 ([7327445](https://github.com/thejaswitricon/semantic-release/commit/7327445c7dc177a4435147ea534054505b08b034))
+* app1 and app2 ([8b7d6f1](https://github.com/thejaswitricon/semantic-release/commit/8b7d6f15811130ab9f267bf7aabe462c7d82aee6))
+* app1 and app2 ([7663993](https://github.com/thejaswitricon/semantic-release/commit/766399373f152d85eba3d1bbe4f2fa30cba4c601))
+* app1 and app2 ([c1a8678](https://github.com/thejaswitricon/semantic-release/commit/c1a8678f55265ca35829df3367f5ced465162024))
+* app1 and app2 ([0124748](https://github.com/thejaswitricon/semantic-release/commit/012474859026ddd2a6ff13ea95c6a3db26d756d3))
+* app2 ([b330e93](https://github.com/thejaswitricon/semantic-release/commit/b330e93a7fbcf6e44a75f7e1c237d6cd4ffb8236))
+* app2 ([789cf12](https://github.com/thejaswitricon/semantic-release/commit/789cf12a298b732397fae2aae65f8db16a960571))
+* app2 ([c47eeaa](https://github.com/thejaswitricon/semantic-release/commit/c47eeaa772569294351db2e616825a309f65fd49))
+* app2 ([98df8de](https://github.com/thejaswitricon/semantic-release/commit/98df8de8f628babdf39e7a41479757947fc719e1))
+* app2 ([1cd034b](https://github.com/thejaswitricon/semantic-release/commit/1cd034b1e8449eb7ceaebd6e29e4ce5e297c9fe1))
+* app2 ([077961c](https://github.com/thejaswitricon/semantic-release/commit/077961c5a4102d696e098e664c2ffd5d1cda1137))
+* app2 ([cf8fe7e](https://github.com/thejaswitricon/semantic-release/commit/cf8fe7e0b87df170f08add3804f02b65eebad110))
+* app2 ([7c53548](https://github.com/thejaswitricon/semantic-release/commit/7c535489c7d6e2faca153e204e294bd0cec5e1b4))
+
 # 1.0.0 (2023-04-25)
 
 
