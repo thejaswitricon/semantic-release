@@ -25,14 +25,12 @@ jobs:
       - name: Get changed directories
         id: changed_dirs
         run: |
-          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u > dirs.txt
-          mapfile -t dirs < dirs.txt
-          echo "{\"dirs\":${dirs[@]}}" > dirs.json
-          echo "::set-output name=dirs::$(cat dirs.json)"
+          changed_dirs=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u)
+          echo "::set-output name=changed_dirs::$(echo "$changed_dirs" | jq -R . | jq -s '{dirs: .}')"
 
       - name: Print changed directories
         run: |
-          dirs=$(echo ${{ steps.changed_dirs.outputs.dirs }} | jq -r '.dirs[]')
+          dirs=$(echo ${{ steps.changed_dirs.outputs.changed_dirs }} | jq -r '.dirs[]')
           echo "Changed directories: $dirs"
 
       # # Update the tag format to include the name of the directory
