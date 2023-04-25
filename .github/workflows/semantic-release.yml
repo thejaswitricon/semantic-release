@@ -7,76 +7,66 @@ on:
       - master
     paths:
       - 'applications/**'
-
+      
 permissions: write-all
 
 jobs:
-  fetch_changed_folders:
+  release:
+    strategy:
+      matrix:
+        app: [app1, app2, app3, app4] # Add all application directories you want to run
+    name: Semantic Release for ${{ matrix.app }}
     runs-on: ubuntu-latest
-    outputs:
-      dirs: ${{ steps.set_dirs.outputs.dirs }}
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
+      # Get the name of the directory that was changed
+      - name: Get changed directory
+        id: changed_dir
+        run: echo "::set-output name=dir::${{ matrix.app }}"
+        
+      # Update the tag format to include the name of the directory
+      - name: Update tag format
+        id: update_tag_format
+        run: echo "::set-output name=tag_format::${{ steps.changed_dir.outputs.dir }}-v\${{ env.VERSION }}"
+        env:
+          VERSION: ${{ github.run_number }}
+        
 
-      - name: Set changed directories
-        id: set_dirs
-        run: |
-          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $1}' | sort -u > dirs.txt
-          mapfile -t dirs < dirs.txt
-          echo "{\"dirs\":${dirs[@]}}" > dirs.json
-          echo "::set-output name=dirs::$(cat dirs.json)"
+      # https://github.com/marketplace/actions/semantic-release-action#usage
+      - name: Semantic Release
+        uses: docker://ghcr.io/codfish/semantic-release-action:v2
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
+        with:
+          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
+          additional_packages: |
+            ['@semantic-release/changelog', '@semantic-release/git']
+          plugins: |
+            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
+          # specify default branches to add support for the `main` branch
+          # which semantic-release doesn't have as a default yet.
+          branches: |
+            [
+              'master'
+            ]
 
-      - name: Print changed directories
-        run: |
-          dirs=$(echo ${{ steps.set_dirs.outputs.dirs }} | jq -r '.dirs[]')
-          echo "Changed directories: $dirs"
-
-      # # Update the tag format to include the name of the directory
-      # - name: Update tag format
-      #   id: update_tag_format
-      #   run: |
-      #     APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
-      #     echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
-
-      # - name: Add new version to changelog
-      #   id: add_version_to_changelog
+      # # Get the latest version tag
+      # - name: Get latest version tag
       #   run: |
       #     version=$(git describe --tags --abbrev=0)
-      #     sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
-      #   continue-on-error: true 
+      #     echo "::set-output name=version::$version"
 
-      # # https://github.com/marketplace/actions/semantic-release-action#usage
-      # - name: Semantic Release
-      #   uses: docker://ghcr.io/codfish/semantic-release-action:v2
-      #   id: semantic
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
-      #   with:
-      #     tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
-      #     additional_packages: |
-      #       ['@semantic-release/changelog', '@semantic-release/git']
-      #     plugins: |
-      #       ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
-      #     # specify default branches to add support for the `main` branch
-      #     # which semantic-release doesn't have as a default yet.
-      #     branches: |
-      #       [
-      #         'master'
-      #       ]
-
-      # # # Get the latest version tag
-      # # - name: Get latest version tag
-      # #   run: |
-      # #     version=$(git describe --tags --abbrev=0)
-      # #     echo "::set-output name=version::$version"
-
-      # - name: Semantic Release Output Summary
-      #   id: semantic_summary
-      #   run: |
-      #     echo "### Semantic Version = ${{ steps.semantic.outputs.release-version }}\`" >> $GITHUB_STEP_SUMMARY
-      #     echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-      #     echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
-      #     echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-      #   continue-on-error: true
+      - name: Semantic Release Output Summary
+        id: semantic_summary
+        run: |
+          echo "### Semantic Version = ${{ steps.semantic.outputs.release-version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
         
