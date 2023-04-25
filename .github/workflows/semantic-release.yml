@@ -33,9 +33,9 @@ jobs:
       - name: Update tag format
         id: update_tag_format
         run: 
-          echo "::set-output name=tag_format::${{ steps.changed_dir.outputs.dir }}-v\${{ env.VERSION }}"
-        env:
-          VERSION: ${{ github.run_number }}
+          echo "::set-output name=tag_format::${{ steps.changed_dir.outputs.dir }}-v\${version}"
+        # env:
+        #   VERSION: ${{ github.run_number }}
         
 
       # https://github.com/marketplace/actions/semantic-release-action#usage
