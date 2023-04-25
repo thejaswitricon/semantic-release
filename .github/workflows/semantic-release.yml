@@ -37,8 +37,14 @@ jobs:
       - name: Update tag format
         id: update_tag_format
         run: |
-          APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
-          echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
+          mapfile -t dirs < <(echo "${{ steps.changed_dirs.outputs.dirs }}")
+          for dir in "${dirs[@]}"
+          do
+            APP_NAME=$(echo "$dir" | awk '{print tolower($0)}')
+            echo "::set-output name=${APP_NAME}_tag_format::${APP_NAME}-v\${version}"
+            echo "Tag format for $dir is ${APP_NAME}-v\${version}"
+          done
+
 
       - name: Add new version to changelog
         id: add_version_to_changelog
