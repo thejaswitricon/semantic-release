@@ -11,27 +11,27 @@ on:
 permissions: write-all
 
 jobs:
-  release:
-    name: Semantic Release
+  fetch_changed_folders:
     runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.set_dirs.outputs.dirs }}
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
-        id: checkout
-        with:
-          fetch-depth: 0
 
-      # Get the name of the directory that was changed
-      - name: Get changed directories
-        id: changed_dirs
+      - name: Set changed directories
+        id: set_dirs
         run: |
-          changed_dirs=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u)
-          echo "::set-output name=changed_dirs::$(echo "$changed_dirs" | jq -R . | jq -s '{dirs: [. | split("\n") | select(length > 0)]}')"
+          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $1}' | sort -u > dirs.txt
+          mapfile -t dirs < dirs.txt
+          echo "{\"dirs\":${dirs[@]}}" > dirs.json
+          echo "::set-output name=dirs::$(cat dirs.json)"
 
       - name: Print changed directories
         run: |
-          dirs=$(echo ${{ steps.changed_dirs.outputs.changed_dirs }} | jq -r '.dirs[]')
+          dirs=$(echo ${{ steps.set_dirs.outputs.dirs }} | jq -r '.dirs[]')
           echo "Changed directories: $dirs"
+
       # # Update the tag format to include the name of the directory
       # - name: Update tag format
       #   id: update_tag_format
