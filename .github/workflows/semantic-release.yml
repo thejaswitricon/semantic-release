@@ -7,14 +7,14 @@ on:
       - master
     paths:
       - 'applications/**'
-      
+
 permissions: write-all
 
 jobs:
   release:
     strategy:
       matrix:
-        app: [app1, app2] # Add all application directories you want to run
+        app: [app1, app2, app3, app4] # Add all application directories you want to run
     name: Semantic Release for ${{ matrix.app }}
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +36,13 @@ jobs:
           echo "::set-output name=tag_format::${{ steps.changed_dir.outputs.dir }}-v\${version}"
         # env:
         #   VERSION: ${{ github.run_number }}
-        
+
+      - name: Add new version to changelog
+        id: add_version_to_changelog
+        run: |
+          version=$(git describe --tags --abbrev=0)
+          sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
+        continue-on-error: true 
 
       # https://github.com/marketplace/actions/semantic-release-action#usage
       - name: Semantic Release
@@ -71,4 +77,3 @@ jobs:
           echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
-        
