@@ -46,7 +46,7 @@ jobs:
           ${{ matrix.app != steps.changed_dir.outputs.dir }}
         run: |
           echo "Directory ${{ steps.changed_dir.outputs.dir }} not changed, stopping job"
-          exit 78 # exit with neutral status to stop the job
+          exit 0 # exit with neutral status to stop the job
 
       # Update the tag format to include the name of the directory
       - name: Update tag format
