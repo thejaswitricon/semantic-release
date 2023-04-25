@@ -23,19 +23,21 @@ jobs:
           fetch-depth: 0
           
       # Get the name of the directory that was changed
-      - name: Get changed directory
-        id: changed_dir
+      - name: Get changed directories
+        id: changed_dirs
         run: |
           modified_files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -e '^applications/app1/' -e '^applications/app2/')
-          if echo "$modified_files" | grep -qE '^applications/app1/'; then
-            echo "::set-output name=dir::app1"
+          if echo "$modified_files" | grep -qE '^applications/app1/' && echo "$modified_files" | grep -qE '^applications/app2/'; then
+            echo "::set-output name=dirs::app1 app2"
+          elif echo "$modified_files" | grep -qE '^applications/app1/'; then
+            echo "::set-output name=dirs::app1"
           elif echo "$modified_files" | grep -qE '^applications/app2/'; then
-            echo "::set-output name=dir::app2"
+            echo "::set-output name=dirs::app2"
           else
             echo "No changes in app1 or app2 folder."
             exit 1
           fi
-
+          
       - name: Print changed directory
         run: |
           echo "Changed directory: ${{ steps.changed_dir.outputs.dir }}"
