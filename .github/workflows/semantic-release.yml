@@ -51,7 +51,6 @@ jobs:
       # Update the tag format to include the name of the directory
       - name: Update tag format
         id: update_tag_format
-        if: ${{ matrix.app == steps.changed_dir.outputs.dir }}
         run: 
           echo "::set-output name=tag_format::${{ steps.changed_dir.outputs.dir }}-v\${version}"
         # env:
