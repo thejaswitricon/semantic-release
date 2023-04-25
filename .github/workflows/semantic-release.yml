@@ -49,6 +49,14 @@ jobs:
         # env:
         #   VERSION: ${{ github.run_number }}
 
+      # If the modified directory doesn't match the current directory,
+      # exit the job.
+      - name: Check if current directory matches modified directory
+        if: 
+          ${{ matrix.app != steps.changed_dir.outputs.dir }}
+        run: 
+          exit 0
+
       - name: Add new version to changelog
         id: add_version_to_changelog
         run: |
