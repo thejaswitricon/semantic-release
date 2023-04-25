@@ -26,13 +26,12 @@ jobs:
         id: changed_dirs
         run: |
           changed_dirs=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u)
-          echo "::set-output name=changed_dirs::$(echo "$changed_dirs" | jq -R . | jq -s '{dirs: .}')"
+          echo "::set-output name=changed_dirs::$(echo "$changed_dirs" | jq -R . | jq -s '{dirs: [. | split("\n") | select(length > 0)]}')"
 
       - name: Print changed directories
         run: |
           dirs=$(echo ${{ steps.changed_dirs.outputs.changed_dirs }} | jq -r '.dirs[]')
           echo "Changed directories: $dirs"
-
       # # Update the tag format to include the name of the directory
       # - name: Update tag format
       #   id: update_tag_format
