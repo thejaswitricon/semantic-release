@@ -27,74 +27,59 @@ jobs:
         run: |
           git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u > dirs.txt
           mapfile -t dirs < dirs.txt
-          echo "::set-output name=dirs::${dirs[*]}"
-##############################################################################
+          echo "{\"dirs\":${dirs[@]}}" > dirs.json
+          echo "::set-output name=dirs::$(cat dirs.json)"
+
       - name: Print changed directories
         run: |
-          echo "Changed directories: ${{ steps.changed_dirs.outputs.dirs }}"
-##############################################################################
+          dirs=$(echo ${{ steps.changed_dirs.outputs.dirs }} | jq -r '.dirs[]')
+          echo "Changed directories: $dirs"
 
-      # Update the tag format to include the name of the directory
-      - name: Update tag format
-        id: update_tag_format
-        run: |
-          mapfile -t dirs < <(echo "${{ steps.changed_dirs.outputs.dirs }}")
-          tags=()
-          for dir in "${dirs[@]}"
-          do
-            APP_NAME=$(echo "$dir" | awk '{print tolower($0)}')
-            tag="${APP_NAME}-v${{ steps.get_version.outputs[${APP_NAME}_version] }}"
-            tags+=("$tag")
-            echo "::set-output name=${APP_NAME}_tag_format::$tag"
-            echo "Tag format for $dir is $tag"
-          done
-          echo "::set-output name=tags::${tags[*]}"
+      # # Update the tag format to include the name of the directory
+      # - name: Update tag format
+      #   id: update_tag_format
+      #   run: |
+      #     APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
+      #     echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
 
-
-####################################################################
-      - name: Print output variables
-        run: |
-          echo "Changed directories: ${{ steps.changed_dirs.outputs.dirs }}"
-          echo "Tags: ${{ steps.update_tag_format.outputs.tags }}"
-#######################################################################
-      - name: Add new version to changelog
-        id: add_version_to_changelog
-        run: |
-          version=$(git describe --tags --abbrev=0)
-          sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
-        continue-on-error: true 
-
-      # https://github.com/marketplace/actions/semantic-release-action#usage
-      - name: Semantic Release
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
-        with:
-          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
-          additional_packages: |
-            ['@semantic-release/changelog', '@semantic-release/git']
-          plugins: |
-            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
-          # specify default branches to add support for the `main` branch
-          # which semantic-release doesn't have as a default yet.
-          branches: |
-            [
-              'master'
-            ]
-
-      # # Get the latest version tag
-      # - name: Get latest version tag
+      # - name: Add new version to changelog
+      #   id: add_version_to_changelog
       #   run: |
       #     version=$(git describe --tags --abbrev=0)
-      #     echo "::set-output name=version::$version"
+      #     sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
+      #   continue-on-error: true 
 
-      - name: Semantic Release Output Summary
-        id: semantic_summary
-        run: |
-          echo "### Semantic Version = ${{ steps.semantic.outputs.release-version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-        continue-on-error: true
+      # # https://github.com/marketplace/actions/semantic-release-action#usage
+      # - name: Semantic Release
+      #   uses: docker://ghcr.io/codfish/semantic-release-action:v2
+      #   id: semantic
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
+      #   with:
+      #     tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
+      #     additional_packages: |
+      #       ['@semantic-release/changelog', '@semantic-release/git']
+      #     plugins: |
+      #       ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
+      #     # specify default branches to add support for the `main` branch
+      #     # which semantic-release doesn't have as a default yet.
+      #     branches: |
+      #       [
+      #         'master'
+      #       ]
+
+      # # # Get the latest version tag
+      # # - name: Get latest version tag
+      # #   run: |
+      # #     version=$(git describe --tags --abbrev=0)
+      # #     echo "::set-output name=version::$version"
+
+      # - name: Semantic Release Output Summary
+      #   id: semantic_summary
+      #   run: |
+      #     echo "### Semantic Version = ${{ steps.semantic.outputs.release-version }}\`" >> $GITHUB_STEP_SUMMARY
+      #     echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      #     echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
+      #     echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      #   continue-on-error: true
         
