@@ -28,24 +28,33 @@ jobs:
           git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u > dirs.txt
           mapfile -t dirs < dirs.txt
           echo "::set-output name=dirs::${dirs[*]}"
-
+##############################################################################
       - name: Print changed directories
         run: |
           echo "Changed directories: ${{ steps.changed_dirs.outputs.dirs }}"
+##############################################################################
 
       # Update the tag format to include the name of the directory
       - name: Update tag format
         id: update_tag_format
         run: |
           mapfile -t dirs < <(echo "${{ steps.changed_dirs.outputs.dirs }}")
+          tags=()
           for dir in "${dirs[@]}"
           do
             APP_NAME=$(echo "$dir" | awk '{print tolower($0)}')
-            echo "::set-output name=${APP_NAME}_tag_format::${APP_NAME}-v\${version}"
-            echo "Tag format for $dir is ${APP_NAME}-v\${version}"
+            tag="${APP_NAME}-v\${{ steps.get_version.outputs.${APP_NAME}_version }}"
+            tags+=("$tag")
+            echo "::set-output name=${APP_NAME}_tag_format::$tag"
+            echo "Tag format for $dir is $tag"
           done
-
-
+          echo "::set-output name=tags::${tags[*]}"
+####################################################################
+      - name: Print output variables
+        run: |
+          echo "Changed directories: ${{ steps.changed_dirs.outputs.dirs }}"
+          echo "Tags: ${{ steps.update_tag_format.outputs.tags }}"
+#######################################################################
       - name: Add new version to changelog
         id: add_version_to_changelog
         run: |
