@@ -36,6 +36,10 @@ jobs:
             exit 1
           fi
 
+      - name: Print changed directory
+        run: |
+          echo "Changed directory: ${{ steps.changed_dir.outputs.dir }}"
+
       # Check if the changed directory matches the matrix app name
       - name: Check if changed directory matches matrix app name
         if: 
@@ -43,11 +47,6 @@ jobs:
         run: |
           echo "Directory ${{ steps.changed_dir.outputs.dir }} not changed, stopping job"
           exit 78 # exit with neutral status to stop the job
-
-
-      - name: Print changed directory
-        run: |
-          echo "Changed directory: ${{ steps.changed_dir.outputs.dir }}"
 
       # Update the tag format to include the name of the directory
       - name: Update tag format
