@@ -26,7 +26,7 @@ jobs:
       - name: Get changed directory
         id: changed_dir
         run: |
-          modified_files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -E '^applications/(app1|app2)/')
+          modified_files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -e '^applications/app1/' -e '^applications/app2/')
           if echo "$modified_files" | grep -qE '^applications/app1/'; then
             echo "::set-output name=dir::app1"
           elif echo "$modified_files" | grep -qE '^applications/app2/'; then
