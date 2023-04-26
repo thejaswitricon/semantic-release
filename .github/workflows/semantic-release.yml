@@ -24,13 +24,42 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Get the name of the directory that was changed
+      - name: Get changed directories
+        id: changed_dirs
+        run: |
+          modified_files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -e '^applications/app1/' -e '^applications/app2/')
+          if echo "$modified_files" | grep -qE '^applications/app1/' && echo "$modified_files" | grep -qE '^applications/app2/'; then
+            echo "::set-output name=dirs::app1 app2"
+          elif echo "$modified_files" | grep -qE '^applications/app1/'; then
+            echo "::set-output name=dirs::app1"
+          elif echo "$modified_files" | grep -qE '^applications/app2/'; then
+            echo "::set-output name=dirs::app2"
+          else
+            echo "No changes in app1 or app2 folder."
+            exit 1
+          fi
+          
+      - name: Print changed directory
+        run: |
+          echo "Changed directory: ${{ steps.changed_dir.outputs.dir }}"
+
+      # Check if the changed directory matches the matrix app name
+      - name: Check if changed directory matches matrix app name
+        if: 
+          ${{ matrix.app != steps.changed_dir.outputs.dir }}
+        run: |
+          echo "Directory ${{ steps.changed_dir.outputs.dir }} not changed, stopping job"
+          exit 0 # exit with neutral status to stop the job
+
       # Update the tag format to include the name of the directory
       - name: Update tag format
         id: update_tag_format
         run: 
-          echo "::set-output name=tag_format::${{ matrix.app }}-v\${{ github.run_number }}"
-          
-      # Add new version to changelog
+          echo "::set-output name=tag_format::${{ steps.changed_dir.outputs.dir }}-v\${version}"
+        # env:
+        #   VERSION: ${{ github.run_number }}
+
       - name: Add new version to changelog
         id: add_version_to_changelog
         run: |
@@ -56,8 +85,13 @@ jobs:
             [
               'master'
             ]
-      
-      # Print Semantic Release Output Summary
+
+      # # Get the latest version tag
+      # - name: Get latest version tag
+      #   run: |
+      #     version=$(git describe --tags --abbrev=0)
+      #     echo "::set-output name=version::$version"
+
       - name: Semantic Release Output Summary
         id: semantic_summary
         run: |
@@ -66,7 +100,6 @@ jobs:
           echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
-
 
 
 # name: Semantic Release for Apps
