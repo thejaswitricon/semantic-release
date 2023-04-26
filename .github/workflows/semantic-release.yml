@@ -10,26 +10,63 @@ on:
 permissions: write-all
 
 jobs:
-  my_job:
+  release:
+    strategy:
+      matrix:
+        app:
+          - app1
+          - app2 # Add all application directories you want to run
+    name: Semantic Release for ${{ matrix.app }}
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Get Changed Folders
-      id: get_changed_folders
-      run: |
-        CHANGED_FOLDERS=$(git diff --name-only HEAD~..HEAD | xargs dirname | sort | uniq)
-        echo "::set-output name=folders::${CHANGED_FOLDERS}"
+      # Update the tag format to include the name of the directory
+      - name: Update tag format
+        id: update_tag_format
+        run: 
+          echo "::set-output name=tag_format::${{ matrix.app }}-v\${{ github.run_number }}"
+          
+      # Add new version to changelog
+      - name: Add new version to changelog
+        id: add_version_to_changelog
+        run: |
+          version=$(git describe --tags --abbrev=0)
+          sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
+        continue-on-error: true 
 
-    - name: Generate Folder Matrix
-      id: generate_folder_matrix
-      run: |
-        FOLDER_MATRIX=$(echo "${{ steps.get_changed_folders.outputs.folders }}" | sed 's/^/- /')
-        echo "::set-output name=matrix::${FOLDER_MATRIX}"
-    
-    - name: Print Folder Matrix
-      run: echo "${{ steps.generate_folder_matrix.outputs.matrix }}"
+      # https://github.com/marketplace/actions/semantic-release-action#usage
+      - name: Semantic Release
+        uses: docker://ghcr.io/codfish/semantic-release-action:v2
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
+        with:
+          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
+          additional_packages: |
+            ['@semantic-release/changelog', '@semantic-release/git']
+          plugins: |
+            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
+          # specify default branches to add support for the `main` branch
+          # which semantic-release doesn't have as a default yet.
+          branches: |
+            [
+              'master'
+            ]
+      
+      # Print Semantic Release Output Summary
+      - name: Semantic Release Output Summary
+        id: semantic_summary
+        run: |
+          echo "### Semantic Version = ${{ steps.semantic.outputs.release-version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
 
 
 # name: Semantic Release for Apps
@@ -71,7 +108,7 @@ jobs:
 #             echo "No changes in app1 or app2 folder."
 #             exit 1
 #           fi
-
+          
 #       - name: Print changed directory
 #         run: |
 #           echo "Changed directory: ${{ steps.changed_dir.outputs.dir }}"
