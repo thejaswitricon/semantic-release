@@ -1,5 +1,3 @@
-
-
 name: Semantic Release for Apps
 
 on:
@@ -34,6 +32,8 @@ jobs:
         run: |
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
           echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
+      - name: Print tag
+        run: echo ${{ steps.update_tag_format.outputs.dirs }}
 
       - name: Add new version to changelog
         id: add_version_to_changelog
