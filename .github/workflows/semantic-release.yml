@@ -33,12 +33,18 @@ jobs:
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
           echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
       
-      - name: Add new version to changelog
-        id: add_version_to_changelog
-        run: |
-          version=$(git describe --tags --abbrev=0)
-          sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
-        continue-on-error: true 
+      # - name: Add new version to changelog
+      #   id: add_version_to_changelog
+      #   run: |
+      #     version=$(git describe --tags --abbrev=0)
+      #     sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
+      #   continue-on-error: true 
+
+      - name: Changelog file 
+        uses: saadmk11/changelog-ci@v1.1.1
+        id: changelog_md
+        with:
+          config_file: changelog-ci-config.json
 
       # https://github.com/marketplace/actions/semantic-release-action#usage
       - name: Semantic Release
