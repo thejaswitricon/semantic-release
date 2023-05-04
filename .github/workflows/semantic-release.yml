@@ -40,6 +40,27 @@ jobs:
       #     sed -i "s/\[[0-9]\+\.[0-9]\+\.[0-9]\+\]/[${version}] $(date +'%Y-%m-%d')/" CHANGELOG.md        
       #   continue-on-error: true 
 
+      
+
+      # https://github.com/marketplace/actions/semantic-release-action#usage
+      - name: Semantic Release
+        uses: docker://ghcr.io/codfish/semantic-release-action:v2
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
+        with:
+          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
+          additional_packages: |
+            ['@semantic-release/changelog', '@semantic-release/git']
+          plugins: |
+            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
+          # specify default branches to add support for the `main` branch
+          # which semantic-release doesn't have as a default yet.
+          branches: |
+            [
+              'master'
+            ]
+        
       - name: Changelog file 
         uses: saadmk11/changelog-ci@v1.1.1
         id: changelog_md
@@ -62,29 +83,10 @@ jobs:
           # In this example `release_version` is fetched from `workflow_dispatch` events input.
           # You can use any other method to fetch the release version
           # such as environment variable or from output of another action
-          release_version: ${{ github.event.inputs.release_version }}
+          release_version: ${{ steps.semantic.outputs.dirs }}
           # Optional
           github_token: ${{ secrets.PAT_GITHUB2 }}
 
-      # https://github.com/marketplace/actions/semantic-release-action#usage
-      - name: Semantic Release
-        uses: docker://ghcr.io/codfish/semantic-release-action:v2
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
-        with:
-          tag_format: '${{ steps.update_tag_format.outputs.tag_format }}'
-          additional_packages: |
-            ['@semantic-release/changelog', '@semantic-release/git']
-          plugins: |
-            ['@semantic-release/commit-analyzer', '@semantic-release/release-notes-generator', ['@semantic-release/changelog', {changelogTitle: '# CHANGELOG'}], '@semantic-release/github', '@semantic-release/git']
-          # specify default branches to add support for the `main` branch
-          # which semantic-release doesn't have as a default yet.
-          branches: |
-            [
-              'master'
-            ]
-        
       # # Get the latest version tag
       # - name: Get latest version tag
       #   run: |
