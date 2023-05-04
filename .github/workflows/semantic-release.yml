@@ -32,9 +32,7 @@ jobs:
         run: |
           APP_NAME=$(echo "${{ steps.changed_dirs.outputs.dirs }}" | awk '{print tolower($0)}')
           echo "::set-output name=tag_format::${APP_NAME}-v\${version}"
-      - name: Print tag
-        run: echo ${{ steps.update_tag_format.outputs.dirs }}
-
+      
       - name: Add new version to changelog
         id: add_version_to_changelog
         run: |
@@ -60,7 +58,16 @@ jobs:
             [
               'master'
             ]
-
+      - name: Modify Changelog
+        run: |
+          git fetch --tags
+          git checkout $(git describe --tags --abbrev=0)
+          sed -i 's/## \[Unreleased\]/## \[Unreleased\]\n\n### Changes/' CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "Update changelog"
+          git push origin HEAD:$(git describe --tags --abbrev=0)
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB2 }}
       # # Get the latest version tag
       # - name: Get latest version tag
       #   run: |
