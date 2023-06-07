@@ -23,8 +23,14 @@ jobs:
       - name: Get changed directories
         id: changed_dirs
         run: |
-          echo "$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)" >> $GITHUB_ENV
+          echo "$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)" >> $HOME/changed_dirs.txt
       
+      - name: Save state
+        run: echo "::save-state name=dirs::$(cat $HOME/changed_dirs.txt)"
+      
+      - name: Set output
+        run: echo "::set-output name=dirs::$(cat $HOME/changed_dirs.txt)"
+        
         
 
       - name: Echo changed paths
