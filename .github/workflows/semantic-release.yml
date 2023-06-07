@@ -24,7 +24,7 @@ jobs:
         id: changed_dirs
         run: |
           dirs=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)
-          echo "::set-output name=dirs::$dirs"
+          echo "DIRS=$dirs" >> $GITHUB_ENV
         
         
 
