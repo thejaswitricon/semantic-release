@@ -23,7 +23,9 @@ jobs:
       - name: Get changed directories
         id: changed_dirs
         run: |
-          echo "::set-output name=dirs::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)"
+          echo "$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)" > dirs.txt
+          echo "::set-env name=DIRS::$(cat dirs.txt)"
+        
         
 
       - name: Echo changed paths
