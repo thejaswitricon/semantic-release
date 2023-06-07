@@ -28,8 +28,8 @@ jobs:
       - name: Save state
         run: echo "::save-state name=dirs::$(cat $HOME/changed_dirs.txt)"
       
-      - name: Set output
-        run: echo "::set-output name=dirs::$(cat $HOME/changed_dirs.txt)"
+      # - name: Set output
+      #   run: echo "::set-output name=dirs::$(cat $HOME/changed_dirs.txt)"
         
         
 
