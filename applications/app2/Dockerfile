@@ -17,4 +17,3 @@ EXPOSE 5000
 COPY . .
 
 CMD ["flask", "run"]
-
