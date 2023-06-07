@@ -23,8 +23,9 @@ jobs:
       - name: Get changed directories
         id: changed_dirs
         run: |
-          dirs=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)
-          echo "DIRS=$dirs" >> $GITHUB_ENV
+          if git diff --name-only --diff-filter=d "${{ github.sha }}" | grep -q '\.js$'; then
+            echo "::set-output name=dirs::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)"
+          fi
         
         
 
