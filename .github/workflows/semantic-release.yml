@@ -26,10 +26,12 @@ jobs:
         run: |
           echo "::set-output name=dirs::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u)"
 
-      # Echo the array of paths
       - name: Echo changed paths
         run: |
-          echo "Changed paths: ${{ steps.changed_dirs.outputs.dirs }}"
+          echo "Changed paths:"
+          while IFS= read -r file; do
+            echo "$(git rev-parse --show-toplevel)/$file"
+          done <<< "${{ steps.changed_files.outputs.files }}"
 
       # Update the tag format to include the name of the directory
       - name: Update tag format
