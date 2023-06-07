@@ -25,11 +25,11 @@ jobs:
         run: |
           echo "$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)" >> $HOME/changed_dirs.txt
       
-      - name: Save state
-        run: echo "::save-state name=dirs::$(cat $HOME/changed_dirs.txt)"
+      # - name: Save state
+      #   run: echo "::save-state name=dirs::$(cat $HOME/changed_dirs.txt)"
       
-      # - name: Set output
-      #   run: echo "::set-output name=dirs::$(cat $HOME/changed_dirs.txt)"
+      - name: Set output
+        run: echo "::set-output name=dirs::$(cat $HOME/changed_dirs.txt)"
         
         
 
@@ -115,4 +115,3 @@ jobs:
       #     echo "${{ toJson(steps.semantic.outputs) }}" >> $GITHUB_STEP_SUMMARY
       #     echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
       #   continue-on-error: true
-      
