@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'applications/**'
-
+    
 permissions: write-all
 
 jobs:
