@@ -1,9 +1,7 @@
 on:
   push:
     branches: [ master ]
-    paths:
-      - 'applications/**'
-
+    
 jobs:
 
   build-javascript:
