@@ -18,11 +18,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Get the name of the directory that was changed
       - name: Get changed directories
         id: changed_dirs
         run: |
-            echo "::set-output name=dirs::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs -I{} dirname {} | sort -u)"
-          
+          echo "::set-output name=dirs::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | awk -F/ '{print $2}' | sort -u)"
         
 
       - name: Echo changed paths
